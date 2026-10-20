@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ */
+/dts-v1/;
+
+#include "am33xx.dtsi"
+#include "am335x-bone-common.dtsi"
+#include "am335x-boneblack-common.dtsi"
+
+/ {
+	model = "TI AM335x BeagleBone Black";
+	compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
+};
+
+&cpu0_opp_table {
+	/*
+	 * All PG 2.0 silicon may not support 1GHz but some of the early
+	 * BeagleBone Blacks have PG 2.0 silicon which is guaranteed
+	 * to support 1GHz OPP so enable it for PG 2.0 on this board.
+	 */
+	oppnitro-1000000000 {
+		opp-supported-hw = <0x06 0x0100>;
+	};
+};
+
+&am33xx_pinmux {
+        spi0_pins: pinmux_spi0_pins {
+                pinctrl-single,pins = <
+                        0x150 (PIN_INPUT_PULLUP | MUX_MODE0)  /* spi0_sclk, INPUT_PULLUP | MODE0(0x30) */
+                        0x154 (PIN_INPUT_PULLUP | MUX_MODE0)   /* spi0_d0, INPUT_PULLUP | MODE0 (0x30) */
+                        0x158 (PIN_OUTPUT_PULLUP | MUX_MODE0)  /* spi0_d1, OUTPUT_PULLUP | MODE0(0x10) */
+                        0x15c (PIN_OUTPUT_PULLUP | MUX_MODE0)  /* spi0_cs0, OUTPUT_PULLUP | MODE0(0x10) */
+                >;
+        };
+};
+
+&spi0 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&spi0_pins>;
+
+        status = "okay";
+
+        /*DT node for w25q32 spi flash chip*/
+        w25q32: w25q32@0 {
+                compatible = "winbond,w25q32";
+                spi-max-frequency = <50000>;
+                reg = <0x0>;
+                size = <4194304>;       /*4 MBytes*/
+                pagesize = <256>;
+                address-width = <24>;   /*In bits*/
+        };
+};
+
+
+&i2c2 {
+        status = "okay";
+
+        /*Node for at25c32 eeprom*/
+        at24_eeprom: at24@50 {
+                compatible = "e2prom";
+                reg = <0x50>;
+                size = <4096>;          /*4KBytes*/
+                pagesize = <32>;
+                address-width = <12>;   /*In bits*/
+        };
+};
+
+/ {
+        extbutton {
+                compatible = "gpio-button";
+                gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
+        };
+
+};
+

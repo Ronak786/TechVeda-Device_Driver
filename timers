@@ -1,0 +1,57 @@
+Kernel Time measurement
+==============================
+
+1. Kernel programs "Programmable interval timer chip" of the platform to 
+   generate HZ no of interrupts per second.
+
+   (HZ is a kernel parameter whose default value is 100 for most architectures)
+
+2. On each timer interrupt, kernel increments a global counter(unsigned 64 bit)   'jiffies' by 1.(Each incrementation of jiffie counter is called "kernel 
+    tick" and its frequency depends on HZ parameter) 
+
+3. On SMP/Multicore systems primary CPU(cpu/0) timer is used for couting 
+   jiffie ticks
+
+	- CPU/0 timer is default system timer.
+
+4. Jiffies and HZ can be used for time conversion. From previous discussion, we know that HZ is defined as number of ticks in one second:
+
+	HZ = no. ticks/sec
+
+   and jiffies is number of ticks occurred:
+
+	jiffies = no. of ticks
+
+   Therefore, it is not surprise that the following expression can be used to convert from seconds to unit jiffies:
+
+	seconds * HZ
+
+    and to convert from jiffies to seconds:
+
+	jiffies / HZ
+
+5. since kernel services rarely cares about the absolute time, conversion from seconds to ticks is a commonly used in kernel. 
+   Considering the importance of this conversion in kernel, an example of setting a value for some time in the future will look at follows:
+
+	unsigned long now_tick = jiffies ; // now
+	unsigned long next_tick = jiffies + 1 ; // one tick from now
+	unsigned long timer_later = jiffies + (10*HZ) ; // 10s from now
+	unsigned long time_fraction = jiffies + (HZ/10) ; // 0.1s from now
+
+6. Kernel functions can access 'jiffies' as read only counter.
+
+7 All time-based operations in kernel are carried out on the basis of jiffies 
+  stamp
+	ex: 
+	1. process scheduling
+	2. Execution of periodic/single-shot Timer routines
+	3. Bounded wait calls
+	4. network protocol state machines(TCP, SCTP,...)
+	5. All Other time related operations
+
+8. All kernel functions must treat jiffies as current time.
+
+
+9. Kernel header file <linux/time.h> provides functions to convert 
+   jiffies stamp into user representation formats and vice-versa. 
+   (struct timeval, struct timespec)

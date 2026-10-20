@@ -1,0 +1,10 @@
+The system clock gets set to either UTC or Local based on the last option used when the hwclock function was run. If you run:
+
+#hwclock -w --localtime
+
+This should write your system clock to local time instead of UTC and should subsequently set it and read it at boot 
+using local time. 
+
+If you manually set your system clock and the hwclock was last specified with UTC then it will automatically set it back to 
+UTC.
+
